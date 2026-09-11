@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Contador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f5f3;
+    --ink: #1e1e1e;
+    --detail: #ebebeb;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; background: var(--bg); }
+
+  body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    display: flex;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .screen {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    padding: 30px 20px 110px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  header { margin-bottom: 26px; }
+
+  .today {
+    font-size: 13px;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  h1 {
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .filter-field { flex: 1; min-width: 0; }
+  .filter-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+    opacity: 0.55;
+    margin: 0 0 4px 2px;
+  }
+  .filter-bar select {
+    width: 100%;
+    background: var(--detail);
+    border: 1.5px solid var(--detail);
+    border-radius: 12px;
+    padding: 10px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  .filter-bar select:focus { outline: none; border-color: var(--ink); }
+
+  .section-label {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+    margin: 24px 2px 10px;
+  }
+
+  .counters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card {
+    display: flex;
+    align-items: stretch;
+    background: var(--detail);
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .card-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+    padding: 16px 16px;
+  }
+
+  .icon-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .card-text { min-width: 0; }
+
+  .card-title {
+    font-size: 15px;
+    color: var(--ink);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  .count-detail {
+    font-size: 12px;
+    color: var(--ink);
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-stat {
+    flex-shrink: 0;
+    width: 90px;
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 6px;
+  }
+
+  .count-number {
+    display: block;
+    font-weight: 800;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--bg);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .count-unit {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--detail);
+    margin-top: 3px;
+  }
+
+  .login-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 24px;
+  }
+  .login-screen.is-open { display: flex; }
+  .login-box {
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+  }
+  .login-title {
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .login-sub {
+    font-size: 14px;
+    color: var(--ink);
+    opacity: 0.65;
+    line-height: 1.5;
+    margin-bottom: 26px;
+  }
+  .login-btn {
+    width: 100%;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 999px;
+    padding: 14px 0;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .login-btn svg { background: var(--bg); border-radius: 50%; padding: 2px; }
+  .login-error {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--ink);
+    opacity: 0.7;
+    min-height: 16px;
+  }
+
+  .user-chip {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--detail);
+    border-radius: 999px;
+    padding: 5px 10px 5px 5px;
+  }
+  .user-chip img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg);
+  }
+  .user-chip span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .user-chip button {
+    background: none;
+    border: none;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink);
+    opacity: 0.55;
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink);
+  }
+  .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14.5px; line-height: 1.5; }
+
+  .add-button {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 390px;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 999px;
+    padding: 15px 0;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 5;
+    cursor: pointer;
+  }
+
+  /* ---------- Modal (novo / editar) ---------- */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--ink);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 10;
+  }
+  .overlay.is-open { display: flex; }
+
+  .sheet {
+    width: 100%;
+    max-width: 430px;
+    background: var(--bg);
+    border-radius: 26px 26px 0 0;
+    padding: 22px 22px calc(24px + env(safe-area-inset-bottom));
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--detail);
+    border-radius: 2px;
+    margin: 0 auto 18px;
+  }
+
+  .sheet-title {
+    font-weight: 800;
+    font-size: 21px;
+    letter-spacing: -0.01em;
+    margin-bottom: 20px;
+    color: var(--ink);
+  }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--detail);
+    border: 1.5px solid transparent;
+    border-radius: 13px;
+    padding: 12px 14px;
+    color: var(--ink);
+    font-size: 15px;
+    font-family: inherit;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--ink);
+    background: var(--bg);
+  }
+
+  .calendar {
+    background: var(--detail);
+    border-radius: 16px;
+    padding: 14px;
+  }
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .calendar-month {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+    text-transform: capitalize;
+  }
+  .calendar-nav { display: flex; gap: 6px; }
+  .calendar-nav button {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: none;
+    color: var(--ink);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    opacity: 0.5;
+    margin-bottom: 6px;
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .calendar-day {
+    aspect-ratio: 1;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .calendar-day.is-empty { visibility: hidden; cursor: default; }
+  .calendar-day.is-today { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .calendar-day.is-selected { background: var(--ink); color: var(--bg); }
+
+  .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+  .icon-picker button {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    border: 1.5px solid var(--detail);
+    background: var(--bg);
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .icon-picker button.is-active {
+    border-color: var(--ink);
+    background: var(--detail);
+  }
+
+  .category-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+  .category-picker button {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--detail);
+    background: var(--bg);
+    font-size: 13.5px;
+    color: var(--ink);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .category-picker button.is-active {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .category-picker button.add-category {
+    border-style: dashed;
+    color: var(--ink);
+  }
+
+  .mode-toggle { display: flex; gap: 8px; }
+  .mode-toggle button {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 13px;
+    border: 1.5px solid var(--detail);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .mode-toggle button.is-active {
+    border-color: var(--ink);
+    color: var(--bg);
+    background: var(--ink);
+  }
+
+  .sheet-actions { display: flex; gap: 10px; margin-top: 22px; }
+  .sheet-actions button {
+    flex: 1;
+    padding: 13px 0;
+    border-radius: 999px;
+    border: none;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-cancel { background: var(--detail); color: var(--ink); }
+  .btn-save { background: var(--ink); color: var(--bg); }
+  .btn-delete {
+    background: none;
+    border: none;
+    color: var(--ink);
+    text-decoration: underline;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 0;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <p class="login-title">Meus eventos</p>
+    <p class="login-sub">Entre com sua conta Google pra salvar seus contadores pra sempre, em qualquer aparelho.</p>
+    <button class="login-btn" id="btn-google-login">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.9v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.9A9 9 0 0 0 0 9c0 1.45.35 2.83.9 4.03l3.05-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .9 4.97l3.05 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+      Entrar com Google
+    </button>
+    <p class="login-error" id="login-error"></p>
+  </div>
+</div>
+
+<div class="user-chip" id="user-chip" style="display:none;">
+  <img id="user-photo" alt="">
+  <span id="user-name"></span>
+  <button id="btn-logout">Sair</button>
+</div>
+
+<div class="screen">
+  <header>
+    <div class="today" id="today-label"></div>
+    <h1>Meus eventos</h1>
+  </header>
+
+  <div class="filter-bar">
+    <div class="filter-field">
+      <label for="filter-category">Categoria</label>
+      <select id="filter-category"></select>
+    </div>
+    <div class="filter-field">
+      <label for="filter-mode">Tipo</label>
+      <select id="filter-mode">
+        <option value="all">Todos</option>
+        <option value="desde">Desde</option>
+        <option value="faltam">Faltam para</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="section-label" id="upcoming-label" style="display:none;">Próximos eventos</p>
+  <div class="counters" id="counters-list"></div>
+
+  <div id="ongoing-section" style="display:none;">
+    <p class="section-label">Em andamento</p>
+    <div class="counters" id="ongoing-list"></div>
+  </div>
+
+  <div id="past-section" style="display:none;">
+    <p class="section-label">Eventos passados</p>
+    <div class="counters" id="past-list"></div>
+  </div>
+
+  <div class="empty-state" id="empty-state" style="display:none;">
+    <div class="emoji">🌼</div>
+    <p>Nenhum contador ainda.<br>Toque em "Novo contador" pra guardar sua primeira data.</p>
+  </div>
+</div>
+
+<button class="add-button" id="btn-open-new">+ Novo contador</button>
+
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheet-title">Novo contador</div>
+
+    <div class="field">
+      <label for="f-name">Nome</label>
+      <input id="f-name" type="text" placeholder="Ex.: Desde que começamos" maxlength="40">
+    </div>
+
+    <div class="field">
+      <label>Ícone</label>
+      <div class="icon-picker" id="icon-picker"></div>
+    </div>
+
+    <div class="field">
+      <label>Categoria</label>
+      <div class="category-picker" id="category-picker"></div>
+    </div>
+
+    <div class="field">
+      <label>Tipo</label>
+      <div class="mode-toggle" id="mode-toggle">
+        <button type="button" data-mode="desde">Desde</button>
+        <button type="button" data-mode="faltam">Faltam para</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Data</label>
+      <div class="calendar">
+        <div class="calendar-header">
+          <span class="calendar-month" id="cal-month-label"></span>
+          <div class="calendar-nav">
+            <button type="button" id="cal-prev">‹</button>
+            <button type="button" id="cal-next">›</button>
+          </div>
+        </div>
+        <div class="calendar-weekdays">
+          <span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span><span>DOM</span>
+        </div>
+        <div class="calendar-grid" id="cal-grid"></div>
+      </div>
+      <input type="hidden" id="f-date">
+    </div>
+
+    <div class="field">
+      <label>Repetir</label>
+      <div class="category-picker" id="repeat-picker"></div>
+    </div>
+
+    <div class="sheet-actions">
+      <button class="btn-cancel" id="btn-cancel">Cancelar</button>
+      <button class="btn-save" id="btn-save">Salvar</button>
+    </div>
+    <button class="btn-delete" id="btn-delete" style="display:none;">Excluir evento</button>
+  </div>
+</div>
+
+<script type="module">
+  const STORAGE_KEY = 'contador:counters';
+  const CATEGORIES_KEY = 'contador:categories';
+  const DEFAULT_CATEGORIES = ['Show', 'Aniversário', 'Viagem'];
+
+  // ---------- Firebase (salvamento na nuvem) ----------
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDrDZ-Mmbif3isAmsAvyf_bXT1jY4v9kAc",
+    authDomain: "amanda-5ca11.firebaseapp.com",
+    projectId: "amanda-5ca11",
+    storageBucket: "amanda-5ca11.firebasestorage.app",
+    messagingSenderId: "450514349028",
+    appId: "1:450514349028:web:b43bdde69cd8e54ca575f1",
+  };
+
+  let cloudReady = false;
+  let cloudRef = null;
+  let applyingRemote = false;
+  let auth = null;
+
+  try {
+    const firebaseApp = initializeApp(firebaseConfig);
+    auth = getAuth(firebaseApp);
+    const db = getFirestore(firebaseApp);
+    const provider = new GoogleAuthProvider();
+    enableIndexedDbPersistence(db).catch(() => {});
+
+    const loginScreen = document.getElementById('login-screen');
+    const loginError = document.getElementById('login-error');
+    const userChip = document.getElementById('user-chip');
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        cloudReady = false;
+        cloudRef = null;
+        loginScreen.classList.add('is-open');
+        userChip.style.display = 'none';
+        return;
+      }
+
+      loginScreen.classList.remove('is-open');
+      userChip.style.display = 'flex';
+      document.getElementById('user-name').textContent = user.displayName || user.email || 'Conta conectada';
+      document.getElementById('user-photo').src = user.photoURL || '';
+
+      cloudRef = doc(db, 'contadores', user.uid);
+      cloudReady = true;
+
+      onSnapshot(cloudRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          applyingRemote = true;
+          counters = data.counters || [];
+          categories = (data.categories && data.categories.length) ? data.categories : [...DEFAULT_CATEGORIES];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(counters));
+          localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
+          if (!categories.includes(selectedCategory)) selectedCategory = categories[0];
+          renderFilterCategoryOptions();
+          renderList();
+          applyingRemote = false;
+        } else {
+          syncToCloud();
+        }
+      });
+    });
+
+    document.getElementById('btn-google-login').addEventListener('click', () => {
+      loginError.textContent = '';
+      signInWithPopup(auth, provider).catch((err) => {
+        console.error('Falha ao entrar com Google:', err);
+        loginError.textContent = 'Não deu pra entrar. Tenta de novo?';
+      });
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      signOut(auth);
+    });
+  } catch (err) {
+    console.error('Firebase indisponível, usando apenas armazenamento local:', err);
+  }
+
+  function syncToCloud() {
+    if (!cloudReady || !cloudRef || applyingRemote) return;
+    setDoc(cloudRef, { counters, categories }, { merge: false }).catch((err) => {
+      console.error('Falha ao sincronizar com a nuvem:', err);
+    });
+  }
+
+  const ICONS = ['✨','❤️','🎂','🏠','✈️','🎓','🐶','🎤','🎉','⭐'];
+  const MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+
+  let counters = loadCounters();
+  let categories = loadCategories();
+  let editingId = null;
+  let selectedIcon = ICONS[0];
+  let selectedMode = 'desde';
+  let selectedCategory = categories[0];
+  let selectedRepeat = 'none';
+  const REPEAT_OPTIONS = [
+    { key: 'none', label: 'Não repete' },
+    { key: 'weekly', label: 'Semanal' },
+    { key: 'monthly', label: 'Mensal' },
+    { key: 'yearly', label: 'Anual' },
+  ];
+  let filterCategory = 'all';
+  let filterMode = 'all';
+
+  function loadCounters() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveCounters() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(counters));
+    syncToCloud();
+  }
+
+  function loadCategories() {
+    try {
+      const raw = localStorage.getItem(CATEGORIES_KEY);
+      const list = raw ? JSON.parse(raw) : null;
+      return (list && list.length) ? list : [...DEFAULT_CATEGORIES];
+    } catch (e) {
+      return [...DEFAULT_CATEGORIES];
+    }
+  }
+
+  function saveCategories() {
+    localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
+    syncToCloud();
+  }
+
+  function uid() {
+    return 'c-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+  }
+
+  function parseLocalDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function todayAtMidnight() {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  }
+
+  function daysBetween(a, b) {
+    return Math.round((b.getTime() - a.getTime()) / 86400000);
+  }
+
+  function formatLongDate(date) {
+    return `${date.getDate()} de ${MESES[date.getMonth()]} de ${date.getFullYear()}`;
+  }
+
+  function renderTodayLabel() {
+    document.getElementById('today-label').textContent = 'Hoje é ' + formatLongDate(todayAtMidnight());
+  }
+
+  function renderIconPicker() {
+    const wrap = document.getElementById('icon-picker');
+    wrap.innerHTML = '';
+    ICONS.forEach(icon => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = icon;
+      btn.className = icon === selectedIcon ? 'is-active' : '';
+      btn.addEventListener('click', () => {
+        selectedIcon = icon;
+        renderIconPicker();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderModeToggle() {
+    document.querySelectorAll('#mode-toggle button').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.mode === selectedMode);
+    });
+  }
+
+  document.querySelectorAll('#mode-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedMode = btn.dataset.mode;
+      renderModeToggle();
+    });
+  });
+
+  function renderCategoryPicker() {
+    const wrap = document.getElementById('category-picker');
+    wrap.innerHTML = '';
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = cat;
+      btn.className = cat === selectedCategory ? 'is-active' : '';
+      btn.addEventListener('click', () => {
+        selectedCategory = cat;
+        renderCategoryPicker();
+      });
+      wrap.appendChild(btn);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'add-category';
+    addBtn.textContent = '+ Nova';
+    addBtn.addEventListener('click', () => {
+      const name = prompt('Nome da nova categoria:');
+      if (!name || !name.trim()) return;
+      const clean = name.trim();
+      if (!categories.includes(clean)) {
+        categories.push(clean);
+        saveCategories();
+        renderFilterCategoryOptions();
+      }
+      selectedCategory = clean;
+      renderCategoryPicker();
+    });
+    wrap.appendChild(addBtn);
+  }
+
+  function renderRepeatPicker() {
+    const wrap = document.getElementById('repeat-picker');
+    wrap.innerHTML = '';
+    REPEAT_OPTIONS.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = opt.label;
+      btn.className = opt.key === selectedRepeat ? 'is-active' : '';
+      btn.addEventListener('click', () => {
+        selectedRepeat = opt.key;
+        renderRepeatPicker();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  let calViewYear = todayAtMidnight().getFullYear();
+  let calViewMonth = todayAtMidnight().getMonth();
+
+  function toISODate(date) {
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${date.getFullYear()}-${m}-${d}`;
+  }
+
+  function setCalendarView(date) {
+    calViewYear = date.getFullYear();
+    calViewMonth = date.getMonth();
+  }
+
+  function renderCalendar() {
+    const monthLabel = document.getElementById('cal-month-label');
+    const grid = document.getElementById('cal-grid');
+    const selectedIso = document.getElementById('f-date').value;
+    const todayIso = toISODate(todayAtMidnight());
+
+    monthLabel.textContent = `${MESES[calViewMonth]} de ${calViewYear}`;
+
+    const firstOfMonth = new Date(calViewYear, calViewMonth, 1);
+    const offset = (firstOfMonth.getDay() + 6) % 7;
+    const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+
+    grid.innerHTML = '';
+    for (let i = 0; i < offset; i++) {
+      const empty = document.createElement('span');
+      empty.className = 'calendar-day is-empty';
+      grid.appendChild(empty);
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayDate = new Date(calViewYear, calViewMonth, d);
+      const iso = toISODate(dayDate);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'calendar-day';
+      if (iso === todayIso) btn.classList.add('is-today');
+      if (iso === selectedIso) btn.classList.add('is-selected');
+      btn.textContent = d;
+      btn.addEventListener('click', () => {
+        document.getElementById('f-date').value = iso;
+        renderCalendar();
+      });
+      grid.appendChild(btn);
+    }
+  }
+
+  document.getElementById('cal-prev').addEventListener('click', () => {
+    calViewMonth -= 1;
+    if (calViewMonth < 0) { calViewMonth = 11; calViewYear -= 1; }
+    renderCalendar();
+  });
+  document.getElementById('cal-next').addEventListener('click', () => {
+    calViewMonth += 1;
+    if (calViewMonth > 11) { calViewMonth = 0; calViewYear += 1; }
+    renderCalendar();
+  });
+
+  function renderFilterCategoryOptions() {
+    const select = document.getElementById('filter-category');
+    const current = select.value || 'all';
+    select.innerHTML = '<option value="all">Todos</option>' +
+      categories.map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('');
+    select.value = categories.includes(current) || current === 'all' ? current : 'all';
+  }
+
+  document.getElementById('filter-category').addEventListener('change', e => {
+    filterCategory = e.target.value;
+    renderList();
+  });
+  document.getElementById('filter-mode').addEventListener('change', e => {
+    filterMode = e.target.value;
+    renderList();
+  });
+
+  function nextOccurrence(date, today, repeat) {
+    const next = new Date(date);
+    while (next < today) {
+      if (repeat === 'weekly') next.setDate(next.getDate() + 7);
+      else if (repeat === 'monthly') next.setMonth(next.getMonth() + 1);
+      else if (repeat === 'yearly') next.setFullYear(next.getFullYear() + 1);
+      else break;
+    }
+    return next;
+  }
+
+  function buildCard(counter) {
+    const today = todayAtMidnight();
+    let targetDate = parseLocalDate(counter.date);
+    const repeat = counter.repeat || 'none';
+    let number, unit, detail, group;
+
+    if (counter.mode === 'desde') {
+      const diff = Math.max(0, daysBetween(targetDate, today));
+      number = diff;
+      unit = diff === 1 ? 'dia' : 'dias';
+      detail = formatLongDate(targetDate);
+      group = 'ongoing';
+    } else {
+      let diff = daysBetween(today, targetDate);
+      if (diff < 0 && repeat !== 'none') {
+        targetDate = nextOccurrence(targetDate, today, repeat);
+        diff = daysBetween(today, targetDate);
+      }
+      if (diff > 0) {
+        number = diff;
+        unit = diff === 1 ? 'dia' : 'dias';
+        detail = formatLongDate(targetDate);
+        group = 'upcoming';
+      } else if (diff === 0) {
+        number = '🎉';
+        unit = 'é hoje!';
+        detail = formatLongDate(targetDate);
+        group = 'upcoming';
+      } else {
+        number = Math.abs(diff);
+        unit = Math.abs(diff) === 1 ? 'dia atrás' : 'dias atrás';
+        detail = formatLongDate(targetDate);
+        group = 'past';
+      }
+    }
+
+    const card = document.createElement('button');
+    card.className = 'card';
+    card.type = 'button';
+    card.innerHTML = `
+      <div class="card-main">
+        <div class="icon-badge">${counter.icon}</div>
+        <div class="card-text">
+          <p class="card-title">${escapeHtml(counter.name)}</p>
+          <p class="count-detail">${detail}</p>
+        </div>
+      </div>
+      <div class="card-stat">
+        <span class="count-number">${number}</span>
+        <span class="count-unit">${unit}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => openEdit(counter.id));
+    return { card, group };
+  }
+
+  function renderList() {
+    const list = document.getElementById('counters-list');
+    const upcomingLabel = document.getElementById('upcoming-label');
+    const ongoingSection = document.getElementById('ongoing-section');
+    const ongoingList = document.getElementById('ongoing-list');
+    const pastSection = document.getElementById('past-section');
+    const pastList = document.getElementById('past-list');
+    const empty = document.getElementById('empty-state');
+    list.innerHTML = '';
+    ongoingList.innerHTML = '';
+    pastList.innerHTML = '';
+
+    if (counters.length === 0) {
+      empty.innerHTML = `
+        <div class="emoji">🌼</div>
+        <p>Nenhum contador ainda.<br>Toque em "Novo contador" pra guardar sua primeira data.</p>
+      `;
+      empty.style.display = 'block';
+      upcomingLabel.style.display = 'none';
+      ongoingSection.style.display = 'none';
+      pastSection.style.display = 'none';
+      return;
+    }
+
+    const filtered = counters.filter(c =>
+      (filterCategory === 'all' || c.category === filterCategory) &&
+      (filterMode === 'all' || c.mode === filterMode)
+    );
+
+    if (filtered.length === 0) {
+      empty.innerHTML = `
+        <div class="emoji">🔍</div>
+        <p>Nenhum contador encontrado com esse filtro.</p>
+      `;
+      empty.style.display = 'block';
+      upcomingLabel.style.display = 'none';
+      ongoingSection.style.display = 'none';
+      pastSection.style.display = 'none';
+      return;
+    }
+    empty.style.display = 'none';
+
+    const sorted = [...filtered].sort((a, b) => b.createdAt - a.createdAt);
+
+    sorted.forEach(counter => {
+      const { card, group } = buildCard(counter);
+      if (group === 'ongoing') {
+        ongoingList.appendChild(card);
+      } else if (group === 'past') {
+        pastList.appendChild(card);
+      } else {
+        list.appendChild(card);
+      }
+    });
+
+    upcomingLabel.style.display = list.children.length > 0 ? 'block' : 'none';
+    ongoingSection.style.display = ongoingList.children.length > 0 ? 'block' : 'none';
+    pastSection.style.display = pastList.children.length > 0 ? 'block' : 'none';
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function openNew() {
+    editingId = null;
+    selectedIcon = ICONS[0];
+    selectedMode = 'desde';
+    selectedCategory = categories[0];
+    selectedRepeat = 'none';
+    document.getElementById('sheet-title').textContent = 'Novo contador';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-date').value = '';
+    document.getElementById('btn-delete').style.display = 'none';
+    setCalendarView(todayAtMidnight());
+    renderIconPicker();
+    renderModeToggle();
+    renderCategoryPicker();
+    renderRepeatPicker();
+    renderCalendar();
+    openOverlay();
+  }
+
+  function openEdit(id) {
+    const counter = counters.find(c => c.id === id);
+    if (!counter) return;
+    editingId = id;
+    selectedIcon = counter.icon;
+    selectedMode = counter.mode;
+    selectedCategory = counter.category && categories.includes(counter.category) ? counter.category : categories[0];
+    selectedRepeat = counter.repeat || 'none';
+    document.getElementById('sheet-title').textContent = 'Editar contador';
+    document.getElementById('f-name').value = counter.name;
+    document.getElementById('f-date').value = counter.date;
+    document.getElementById('btn-delete').style.display = 'block';
+    setCalendarView(parseLocalDate(counter.date));
+    renderIconPicker();
+    renderModeToggle();
+    renderCategoryPicker();
+    renderRepeatPicker();
+    renderCalendar();
+    openOverlay();
+  }
+
+  function openOverlay() {
+    document.getElementById('overlay').classList.add('is-open');
+  }
+  function closeOverlay() {
+    document.getElementById('overlay').classList.remove('is-open');
+  }
+
+  document.getElementById('btn-open-new').addEventListener('click', openNew);
+  document.getElementById('btn-cancel').addEventListener('click', closeOverlay);
+  document.getElementById('overlay').addEventListener('click', e => {
+    if (e.target.id === 'overlay') closeOverlay();
+  });
+
+  document.getElementById('btn-save').addEventListener('click', () => {
+    const name = document.getElementById('f-name').value.trim();
+    const date = document.getElementById('f-date').value;
+    if (!name || !date) {
+      alert('Preencha o nome e a data.');
+      return;
+    }
+
+    if (editingId) {
+      const counter = counters.find(c => c.id === editingId);
+      counter.name = name;
+      counter.date = date;
+      counter.icon = selectedIcon;
+      counter.mode = selectedMode;
+      counter.category = selectedCategory;
+      counter.repeat = selectedRepeat;
+    } else {
+      counters.push({
+        id: uid(),
+        name,
+        date,
+        icon: selectedIcon,
+        mode: selectedMode,
+        category: selectedCategory,
+        repeat: selectedRepeat,
+        createdAt: Date.now(),
+      });
+    }
+    saveCounters();
+    renderList();
+    closeOverlay();
+  });
+
+  document.getElementById('btn-delete').addEventListener('click', () => {
+    if (!editingId) return;
+    if (!confirm('Excluir este contador?')) return;
+    counters = counters.filter(c => c.id !== editingId);
+    saveCounters();
+    renderList();
+    closeOverlay();
+  });
+
+  renderTodayLabel();
+  renderIconPicker();
+  renderModeToggle();
+  renderCategoryPicker();
+  renderRepeatPicker();
+  renderFilterCategoryOptions();
+  renderList();
+</script>
+
+</body>
+</html>
