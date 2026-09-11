@@ -720,7 +720,7 @@
           const credential = GoogleAuthProvider.credential(response.credential);
           signInWithCredential(auth, credential).catch((err) => {
             console.error('Falha ao entrar com Google:', err);
-            loginError.textContent = 'Não deu pra entrar. Tenta de novo?';
+            loginError.textContent = 'Erro: ' + (err.code || err.message || 'desconhecido');
           });
         },
       });
