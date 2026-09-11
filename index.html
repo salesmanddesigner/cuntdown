@@ -2,8 +2,20 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>Contador</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Meus eventos</title>
+
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1e1e1e">
+
+<!-- iOS: abrir em tela cheia, sem barra do Safari -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Meus eventos">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" href="./icons/icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -637,7 +649,7 @@
 
   // ---------- Firebase (salvamento na nuvem) ----------
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -702,10 +714,12 @@
 
     document.getElementById('btn-google-login').addEventListener('click', () => {
       loginError.textContent = '';
-      signInWithPopup(auth, provider).catch((err) => {
-        console.error('Falha ao entrar com Google:', err);
-        loginError.textContent = 'Não deu pra entrar. Tenta de novo?';
-      });
+      signInWithRedirect(auth, provider);
+    });
+
+    getRedirectResult(auth).catch((err) => {
+      console.error('Falha ao entrar com Google:', err);
+      loginError.textContent = 'Não deu pra entrar. Tenta de novo?';
     });
 
     document.getElementById('btn-logout').addEventListener('click', () => {
@@ -1186,6 +1200,12 @@
   renderRepeatPicker();
   renderFilterCategoryOptions();
   renderList();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch((err) => console.error('Falha ao registrar service worker:', err));
+    });
+  }
 </script>
 
 </body>
