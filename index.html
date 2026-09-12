@@ -938,6 +938,7 @@
     return ICON_IMAGES[icon] ? `<img src="${ICON_IMAGES[icon]}" alt="" class="icon-img">` : icon;
   }
   const MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  const MESES_ABBR = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
 
   let counters = loadCounters();
   let categories = loadCategories();
@@ -1122,7 +1123,7 @@
     const monthSelect = document.getElementById('cal-month-select');
     const yearSelect = document.getElementById('cal-year-select');
     if (monthSelect.children.length === 0) {
-      monthSelect.innerHTML = MESES.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+      monthSelect.innerHTML = MESES_ABBR.map((m, i) => `<option value="${i}">${m}</option>`).join('');
     }
     if (yearSelect.children.length === 0) {
       let opts = '';
