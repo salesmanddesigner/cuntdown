@@ -1562,6 +1562,7 @@
     renderRepeatPicker();
     renderCalendar();
     openOverlay();
+    formSnapshot = captureFormSnapshot();
   }
 
   function openEdit(id) {
@@ -1587,6 +1588,31 @@
     renderRepeatPicker();
     renderCalendar();
     openOverlay();
+    formSnapshot = captureFormSnapshot();
+  }
+
+  let formSnapshot = null;
+
+  function captureFormSnapshot() {
+    return JSON.stringify({
+      name: document.getElementById('f-name').value,
+      date: document.getElementById('f-date').value,
+      info: document.getElementById('f-info').value,
+      icon: selectedIcon,
+      mode: selectedMode,
+      unit: selectedUnit,
+      categories: [...selectedCategories].sort(),
+      repeat: selectedRepeat,
+    });
+  }
+
+  function hasUnsavedChanges() {
+    return formSnapshot !== null && formSnapshot !== captureFormSnapshot();
+  }
+
+  function closeOverlayWithConfirm() {
+    if (hasUnsavedChanges() && !confirm('Descartar as alterações não salvas?')) return;
+    closeOverlay();
   }
 
   function openOverlay() {
@@ -1701,13 +1727,13 @@
       if (delta > 120) onClose();
     });
   }
-  setupSheetSwipeToClose('#overlay .sheet', closeOverlay);
+  setupSheetSwipeToClose('#overlay .sheet', closeOverlayWithConfirm);
   setupSheetSwipeToClose('#detail-overlay .sheet', closeDetail);
 
   document.getElementById('btn-open-new').addEventListener('click', openNew);
-  document.getElementById('btn-cancel').addEventListener('click', closeOverlay);
+  document.getElementById('btn-cancel').addEventListener('click', closeOverlayWithConfirm);
   document.getElementById('overlay').addEventListener('click', e => {
-    if (e.target.id === 'overlay') closeOverlay();
+    if (e.target.id === 'overlay') closeOverlayWithConfirm();
   });
   document.getElementById('detail-overlay').addEventListener('click', e => {
     if (e.target.id === 'detail-overlay') closeDetail();
