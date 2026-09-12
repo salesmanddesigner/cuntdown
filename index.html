@@ -500,7 +500,8 @@
     padding: 14px;
     margin-bottom: 22px;
   }
-  #detail-sheet .btn-save {
+  #detail-sheet .btn-save,
+  #detail-sheet .btn-cancel {
     width: 100%;
     padding: 15px 0;
     border-radius: 999px;
@@ -894,6 +895,7 @@
     </div>
 
     <button class="btn-save" id="btn-detail-edit">Editar</button>
+    <button class="btn-cancel" id="btn-detail-calendar" style="margin-top:10px;">Adicionar ao Calendário</button>
   </div>
 </div>
 
@@ -1621,6 +1623,53 @@
     document.getElementById('detail-overlay').classList.remove('is-open');
   }
 
+  function escapeICS(str) {
+    return String(str).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  }
+
+  function formatICSDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}${m}${d}`;
+  }
+
+  function downloadICS(counter) {
+    const startDate = parseLocalDate(counter.date);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 1);
+
+    const repeatMap = { weekly: 'WEEKLY', monthly: 'MONTHLY', yearly: 'YEARLY' };
+    const rrule = repeatMap[counter.repeat] ? `RRULE:FREQ=${repeatMap[counter.repeat]}\r\n` : '';
+    const description = counter.info ? `DESCRIPTION:${escapeICS(counter.info)}\r\n` : '';
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Cuntdown//PT-BR',
+      'BEGIN:VEVENT',
+      `UID:${counter.id}@cuntdown`,
+      `DTSTAMP:${formatICSDate(todayAtMidnight())}T000000Z`,
+      `DTSTART;VALUE=DATE:${formatICSDate(startDate)}`,
+      `DTEND;VALUE=DATE:${formatICSDate(endDate)}`,
+      `SUMMARY:${escapeICS(counter.name)}`,
+      rrule.trim(),
+      description.trim(),
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].filter(Boolean).join('\r\n');
+
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${counter.name.replace(/[^a-z0-9]+/gi, '-')}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+
   // Arrastar a folha pra baixo pra fechar, como nos sheets nativos do iOS.
   function setupSheetSwipeToClose(sheetSelector, onClose) {
     const sheet = document.querySelector(sheetSelector);
@@ -1666,6 +1715,10 @@
   document.getElementById('btn-detail-edit').addEventListener('click', () => {
     closeDetail();
     openEdit(detailId);
+  });
+  document.getElementById('btn-detail-calendar').addEventListener('click', () => {
+    const counter = counters.find(c => c.id === detailId);
+    if (counter) downloadICS(counter);
   });
 
   document.getElementById('btn-save').addEventListener('click', () => {
