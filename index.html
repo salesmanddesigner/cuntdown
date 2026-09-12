@@ -1106,8 +1106,10 @@
         categories = categories.filter(c => c !== cat);
         saveCategories();
         if (selectedCategory === cat) selectedCategory = categories[0];
+        if (filterCategory === cat) filterCategory = 'all';
         renderCategoryPicker();
         renderFilterCategoryOptions();
+        renderList();
       });
       btn.appendChild(del);
 
