@@ -63,11 +63,11 @@
     color: var(--ink);
   }
   .header-icon {
-    width: 56px;
-    height: 56px;
+    width: 88px;
+    height: 88px;
     object-fit: contain;
     display: block;
-    margin: 0 auto 10px;
+    margin: 0 auto 14px;
   }
 
   .filter-bar {
@@ -215,7 +215,7 @@
   }
   .login-title {
     font-weight: 800;
-    font-size: 26px;
+    font-size: 38px;
     letter-spacing: -0.02em;
     color: var(--ink);
     margin-bottom: 10px;
@@ -336,6 +336,17 @@
   .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
   .empty-state .empty-icon { width: 88px; height: 88px; object-fit: contain; margin-bottom: 14px; }
   .empty-state p { font-size: 14.5px; line-height: 1.5; }
+
+  .bottom-fade {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 130px;
+    background: linear-gradient(to bottom, rgba(246, 245, 243, 0) 0%, rgba(246, 245, 243, 1) 65%);
+    pointer-events: none;
+    z-index: 4;
+  }
 
   .add-button {
     position: fixed;
@@ -640,6 +651,7 @@
   </div>
 </div>
 
+<div class="bottom-fade"></div>
 <button class="add-button" id="btn-open-new">+ Novo contador</button>
 
 <div class="overlay" id="overlay">
@@ -665,8 +677,8 @@
     <div class="field">
       <label>Tipo</label>
       <div class="mode-toggle" id="mode-toggle">
-        <button type="button" data-mode="desde">Desde</button>
         <button type="button" data-mode="faltam">Faltam para</button>
+        <button type="button" data-mode="desde">Desde</button>
       </div>
     </div>
 
@@ -1321,6 +1333,7 @@
 
   function openOverlay() {
     document.getElementById('overlay').classList.add('is-open');
+    document.querySelector('.sheet').scrollTop = 0;
   }
   function closeOverlay() {
     document.getElementById('overlay').classList.remove('is-open');
