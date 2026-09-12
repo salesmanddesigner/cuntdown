@@ -483,6 +483,23 @@
     opacity: 0.6;
     margin-bottom: 22px;
   }
+  .detail-info-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    opacity: 0.6;
+    margin-bottom: 6px;
+  }
+  .detail-info-text {
+    font-size: 14.5px;
+    color: var(--ink);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    background: var(--detail);
+    border-radius: 13px;
+    padding: 14px;
+    margin-bottom: 22px;
+  }
   #detail-sheet .btn-save {
     width: 100%;
     padding: 15px 0;
@@ -502,7 +519,7 @@
     font-weight: 600;
     margin-bottom: 6px;
   }
-  .field input, .field select {
+  .field input, .field select, .field textarea {
     width: 100%;
     background: var(--detail);
     border: 1.5px solid transparent;
@@ -512,7 +529,8 @@
     font-size: 15px;
     font-family: inherit;
   }
-  .field input:focus, .field select:focus {
+  .field textarea { resize: vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus {
     outline: none;
     border-color: var(--ink);
     background: var(--bg);
@@ -839,6 +857,11 @@
       <div class="category-picker" id="repeat-picker"></div>
     </div>
 
+    <div class="field">
+      <label for="f-info">Informações (opcional)</label>
+      <textarea id="f-info" rows="3" placeholder="Ex: endereço do local, onde comprou o ingresso, observações..." maxlength="500"></textarea>
+    </div>
+
     <div class="sheet-actions">
       <button class="btn-cancel" id="btn-cancel">Cancelar</button>
       <button class="btn-save" id="btn-save">Salvar</button>
@@ -864,6 +887,11 @@
       <span class="detail-unit" id="detail-unit"></span>
     </div>
     <p class="detail-date" id="detail-date"></p>
+
+    <div id="detail-info-block" style="display:none;">
+      <p class="detail-info-label">Informações</p>
+      <p class="detail-info-text" id="detail-info-text"></p>
+    </div>
 
     <button class="btn-save" id="btn-detail-edit">Editar</button>
   </div>
@@ -947,7 +975,8 @@
           categories = (data.categories && data.categories.length) ? data.categories : [...DEFAULT_CATEGORIES];
           localStorage.setItem(STORAGE_KEY, JSON.stringify(counters));
           localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
-          if (!categories.includes(selectedCategory)) selectedCategory = categories[0];
+          selectedCategories = selectedCategories.filter(c => categories.includes(c));
+          if (selectedCategories.length === 0 && categories.length) selectedCategories = [categories[0]];
           renderFilterCategoryOptions();
           renderList();
           applyingRemote = false;
@@ -1063,7 +1092,13 @@
   let selectedIcon = ICONS[0];
   let selectedMode = 'faltam';
   let selectedUnit = 'dias';
-  let selectedCategory = categories[0];
+  let selectedCategories = categories.length ? [categories[0]] : [];
+
+  function getCategories(counter) {
+    if (counter.categories && counter.categories.length) return counter.categories;
+    if (counter.category) return [counter.category];
+    return [];
+  }
   let selectedRepeat = 'none';
   const REPEAT_OPTIONS = [
     { key: 'none', label: 'Não repete' },
@@ -1177,7 +1212,7 @@
     categories.forEach(cat => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'category-pill' + (cat === selectedCategory ? ' is-active' : '');
+      btn.className = 'category-pill' + (selectedCategories.includes(cat) ? ' is-active' : '');
 
       const label = document.createElement('span');
       label.textContent = cat;
@@ -1195,7 +1230,8 @@
         if (!confirm(`Excluir a categoria "${cat}"?`)) return;
         categories = categories.filter(c => c !== cat);
         saveCategories();
-        if (selectedCategory === cat) selectedCategory = categories[0];
+        selectedCategories = selectedCategories.filter(c => c !== cat);
+        if (selectedCategories.length === 0 && categories.length) selectedCategories = [categories[0]];
         if (filterCategory === cat) filterCategory = 'all';
         renderCategoryPicker();
         renderFilterCategoryOptions();
@@ -1204,7 +1240,13 @@
       btn.appendChild(del);
 
       btn.addEventListener('click', () => {
-        selectedCategory = cat;
+        if (selectedCategories.includes(cat)) {
+          if (selectedCategories.length > 1) {
+            selectedCategories = selectedCategories.filter(c => c !== cat);
+          }
+        } else {
+          selectedCategories.push(cat);
+        }
         renderCategoryPicker();
       });
       wrap.appendChild(btn);
@@ -1222,7 +1264,7 @@
         saveCategories();
         renderFilterCategoryOptions();
       }
-      selectedCategory = clean;
+      if (!selectedCategories.includes(clean)) selectedCategories.push(clean);
       renderCategoryPicker();
     });
     wrap.appendChild(addBtn);
@@ -1457,7 +1499,7 @@
     }
 
     const filtered = counters.filter(c =>
-      (filterCategory === 'all' || c.category === filterCategory) &&
+      (filterCategory === 'all' || getCategories(c).includes(filterCategory)) &&
       (filterMode === 'all' || c.mode === filterMode)
     );
 
@@ -1503,11 +1545,12 @@
     selectedIcon = ICONS[0];
     selectedMode = 'faltam';
     selectedUnit = 'dias';
-    selectedCategory = categories[0];
+    selectedCategories = categories.length ? [categories[0]] : [];
     selectedRepeat = 'none';
     document.getElementById('sheet-title').textContent = 'Novo evento';
     document.getElementById('f-name').value = '';
     document.getElementById('f-date').value = '';
+    document.getElementById('f-info').value = '';
     document.getElementById('btn-delete').style.display = 'none';
     setCalendarView(todayAtMidnight());
     renderIconPicker();
@@ -1526,11 +1569,13 @@
     selectedIcon = counter.icon;
     selectedMode = counter.mode;
     selectedUnit = counter.unit || 'dias';
-    selectedCategory = counter.category && categories.includes(counter.category) ? counter.category : categories[0];
+    selectedCategories = getCategories(counter).filter(c => categories.includes(c));
+    if (selectedCategories.length === 0 && categories.length) selectedCategories = [categories[0]];
     selectedRepeat = counter.repeat || 'none';
     document.getElementById('sheet-title').textContent = 'Editar evento';
     document.getElementById('f-name').value = counter.name;
     document.getElementById('f-date').value = counter.date;
+    document.getElementById('f-info').value = counter.info || '';
     document.getElementById('btn-delete').style.display = 'block';
     setCalendarView(parseLocalDate(counter.date));
     renderIconPicker();
@@ -1558,10 +1603,17 @@
     const prefix = (group === 'upcoming' && number !== '🎉') ? 'em ' : '';
     document.getElementById('detail-icon').innerHTML = iconMarkup(counter.icon);
     document.getElementById('detail-name').textContent = counter.name;
-    document.getElementById('detail-category').textContent = counter.category || '';
+    document.getElementById('detail-category').textContent = getCategories(counter).join(', ');
     document.getElementById('detail-number').textContent = prefix + number;
     document.getElementById('detail-unit').textContent = unit;
     document.getElementById('detail-date').textContent = detail;
+    const infoBlock = document.getElementById('detail-info-block');
+    if (counter.info && counter.info.trim()) {
+      document.getElementById('detail-info-text').textContent = counter.info;
+      infoBlock.style.display = 'block';
+    } else {
+      infoBlock.style.display = 'none';
+    }
     document.getElementById('detail-overlay').classList.add('is-open');
     document.querySelector('#detail-overlay .sheet').scrollTop = 0;
   }
@@ -1619,6 +1671,7 @@
   document.getElementById('btn-save').addEventListener('click', () => {
     const name = document.getElementById('f-name').value.trim();
     const date = document.getElementById('f-date').value;
+    const info = document.getElementById('f-info').value.trim();
     if (!name || !date) {
       alert('Ei! Você esqueceu o nome e a data.');
       return;
@@ -1631,8 +1684,10 @@
       counter.icon = selectedIcon;
       counter.mode = selectedMode;
       counter.unit = selectedUnit;
-      counter.category = selectedCategory;
+      counter.categories = [...selectedCategories];
+      delete counter.category;
       counter.repeat = selectedRepeat;
+      counter.info = info;
     } else {
       counters.push({
         id: uid(),
@@ -1641,8 +1696,9 @@
         icon: selectedIcon,
         mode: selectedMode,
         unit: selectedUnit,
-        category: selectedCategory,
+        categories: [...selectedCategories],
         repeat: selectedRepeat,
+        info,
         createdAt: Date.now(),
       });
     }
