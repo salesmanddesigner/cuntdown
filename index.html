@@ -458,24 +458,23 @@
   }
   .detail-stat {
     background: var(--ink);
-    border-radius: 18px;
-    padding: 22px 20px;
+    border-radius: 16px;
+    padding: 16px 20px;
     text-align: center;
     margin-bottom: 10px;
   }
   .detail-number {
-    display: block;
+    display: inline;
     font-weight: 800;
-    font-size: 44px;
-    line-height: 1;
+    font-size: 22px;
     color: var(--bg);
   }
   .detail-unit {
-    display: block;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--detail);
-    margin-top: 6px;
+    display: inline;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--bg);
+    margin-left: 6px;
   }
   .detail-date {
     text-align: center;
@@ -486,6 +485,13 @@
   }
   #detail-sheet .btn-save {
     width: 100%;
+    padding: 15px 0;
+    border-radius: 999px;
+    border: none;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
   }
 
   .field { margin-bottom: 16px; }
@@ -1548,11 +1554,12 @@
     const counter = counters.find(c => c.id === id);
     if (!counter) return;
     detailId = id;
-    const { number, unit, detail } = computeDisplay(counter);
+    const { number, unit, detail, group } = computeDisplay(counter);
+    const prefix = (group === 'upcoming' && number !== '🎉') ? 'em ' : '';
     document.getElementById('detail-icon').innerHTML = iconMarkup(counter.icon);
     document.getElementById('detail-name').textContent = counter.name;
     document.getElementById('detail-category').textContent = counter.category || '';
-    document.getElementById('detail-number').textContent = number;
+    document.getElementById('detail-number').textContent = prefix + number;
     document.getElementById('detail-unit').textContent = unit;
     document.getElementById('detail-date').textContent = detail;
     document.getElementById('detail-overlay').classList.add('is-open');
