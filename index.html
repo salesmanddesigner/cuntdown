@@ -654,6 +654,14 @@
     </div>
 
     <div class="field">
+      <label>Exibir em</label>
+      <div class="mode-toggle" id="unit-toggle">
+        <button type="button" data-unit="dias">Dias</button>
+        <button type="button" data-unit="anos">Anos</button>
+      </div>
+    </div>
+
+    <div class="field">
       <label>Data</label>
       <div class="calendar">
         <div class="calendar-header">
@@ -869,6 +877,7 @@
   let editingId = null;
   let selectedIcon = ICONS[0];
   let selectedMode = 'desde';
+  let selectedUnit = 'dias';
   let selectedCategory = categories[0];
   let selectedRepeat = 'none';
   const REPEAT_OPTIONS = [
@@ -961,6 +970,19 @@
     btn.addEventListener('click', () => {
       selectedMode = btn.dataset.mode;
       renderModeToggle();
+    });
+  });
+
+  function renderUnitToggle() {
+    document.querySelectorAll('#unit-toggle button').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.unit === selectedUnit);
+    });
+  }
+
+  document.querySelectorAll('#unit-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedUnit = btn.dataset.unit;
+      renderUnitToggle();
     });
   });
 
@@ -1101,16 +1123,25 @@
     return next;
   }
 
+  function formatCount(days, unitPref, pastSuffix) {
+    const suffix = pastSuffix ? ' atrás' : '';
+    if (unitPref === 'anos') {
+      const years = Math.floor(days / 365);
+      return { number: years, unit: (years === 1 ? 'ano' : 'anos') + suffix };
+    }
+    return { number: days, unit: (days === 1 ? 'dia' : 'dias') + suffix };
+  }
+
   function buildCard(counter) {
     const today = todayAtMidnight();
     let targetDate = parseLocalDate(counter.date);
     const repeat = counter.repeat || 'none';
+    const unitPref = counter.unit || 'dias';
     let number, unit, detail, group;
 
     if (counter.mode === 'desde') {
       const diff = Math.max(0, daysBetween(targetDate, today));
-      number = diff;
-      unit = diff === 1 ? 'dia' : 'dias';
+      ({ number, unit } = formatCount(diff, unitPref, false));
       detail = formatLongDate(targetDate);
       group = 'ongoing';
     } else {
@@ -1120,8 +1151,7 @@
         diff = daysBetween(today, targetDate);
       }
       if (diff > 0) {
-        number = diff;
-        unit = diff === 1 ? 'dia' : 'dias';
+        ({ number, unit } = formatCount(diff, unitPref, false));
         detail = formatLongDate(targetDate);
         group = 'upcoming';
       } else if (diff === 0) {
@@ -1130,8 +1160,7 @@
         detail = formatLongDate(targetDate);
         group = 'upcoming';
       } else {
-        number = Math.abs(diff);
-        unit = Math.abs(diff) === 1 ? 'dia atrás' : 'dias atrás';
+        ({ number, unit } = formatCount(Math.abs(diff), unitPref, true));
         detail = formatLongDate(targetDate);
         group = 'past';
       }
@@ -1227,6 +1256,7 @@
     editingId = null;
     selectedIcon = ICONS[0];
     selectedMode = 'desde';
+    selectedUnit = 'dias';
     selectedCategory = categories[0];
     selectedRepeat = 'none';
     document.getElementById('sheet-title').textContent = 'Novo contador';
@@ -1236,6 +1266,7 @@
     setCalendarView(todayAtMidnight());
     renderIconPicker();
     renderModeToggle();
+    renderUnitToggle();
     renderCategoryPicker();
     renderRepeatPicker();
     renderCalendar();
@@ -1248,6 +1279,7 @@
     editingId = id;
     selectedIcon = counter.icon;
     selectedMode = counter.mode;
+    selectedUnit = counter.unit || 'dias';
     selectedCategory = counter.category && categories.includes(counter.category) ? counter.category : categories[0];
     selectedRepeat = counter.repeat || 'none';
     document.getElementById('sheet-title').textContent = 'Editar contador';
@@ -1257,6 +1289,7 @@
     setCalendarView(parseLocalDate(counter.date));
     renderIconPicker();
     renderModeToggle();
+    renderUnitToggle();
     renderCategoryPicker();
     renderRepeatPicker();
     renderCalendar();
@@ -1322,6 +1355,7 @@
       counter.date = date;
       counter.icon = selectedIcon;
       counter.mode = selectedMode;
+      counter.unit = selectedUnit;
       counter.category = selectedCategory;
       counter.repeat = selectedRepeat;
     } else {
@@ -1331,6 +1365,7 @@
         date,
         icon: selectedIcon,
         mode: selectedMode,
+        unit: selectedUnit,
         category: selectedCategory,
         repeat: selectedRepeat,
         createdAt: Date.now(),
@@ -1353,6 +1388,7 @@
   renderTodayLabel();
   renderIconPicker();
   renderModeToggle();
+  renderUnitToggle();
   renderCategoryPicker();
   renderRepeatPicker();
   renderFilterCategoryOptions();
