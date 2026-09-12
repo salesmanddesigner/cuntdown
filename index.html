@@ -1172,13 +1172,14 @@
     let targetDate = parseLocalDate(counter.date);
     const repeat = counter.repeat || 'none';
     const unitPref = counter.unit || 'dias';
-    let number, unit, detail, group;
+    let number, unit, detail, group, sortDays;
 
     if (counter.mode === 'desde') {
       const diff = Math.max(0, daysBetween(targetDate, today));
       ({ number, unit } = formatCount(diff, unitPref, false));
       detail = formatLongDate(targetDate);
       group = 'ongoing';
+      sortDays = diff;
     } else {
       let diff = daysBetween(today, targetDate);
       if (diff < 0 && repeat !== 'none') {
@@ -1189,15 +1190,18 @@
         ({ number, unit } = formatCount(diff, unitPref, false));
         detail = formatLongDate(targetDate);
         group = 'upcoming';
+        sortDays = diff;
       } else if (diff === 0) {
         number = '🎉';
         unit = 'é hoje!';
         detail = formatLongDate(targetDate);
         group = 'upcoming';
+        sortDays = 0;
       } else {
         ({ number, unit } = formatCount(Math.abs(diff), unitPref, true));
         detail = formatLongDate(targetDate);
         group = 'past';
+        sortDays = Math.abs(diff);
       }
     }
 
@@ -1218,7 +1222,7 @@
       </div>
     `;
     card.addEventListener('click', () => openEdit(counter.id));
-    return { card, group };
+    return { card, group, sortDays };
   }
 
   function renderList() {
@@ -1264,15 +1268,15 @@
     empty.style.display = 'none';
 
     const sorted = [...filtered].sort((a, b) => b.createdAt - a.createdAt);
+    const built = sorted.map(counter => ({ counter, ...buildCard(counter) }));
+    const upcomingBuilt = built.filter(b => b.group === 'upcoming').sort((a, b) => a.sortDays - b.sortDays);
 
-    sorted.forEach(counter => {
-      const { card, group } = buildCard(counter);
+    upcomingBuilt.forEach(({ card }) => list.appendChild(card));
+    built.forEach(({ card, group }) => {
       if (group === 'ongoing') {
         ongoingList.appendChild(card);
       } else if (group === 'past') {
         pastList.appendChild(card);
-      } else {
-        list.appendChild(card);
       }
     });
 
