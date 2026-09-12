@@ -337,6 +337,17 @@
   .empty-state .empty-icon { width: 88px; height: 88px; object-fit: contain; margin-bottom: 14px; }
   .empty-state p { font-size: 14.5px; line-height: 1.5; }
 
+  .top-fade {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: calc(env(safe-area-inset-top) + 30px);
+    background: linear-gradient(to bottom, rgba(246, 245, 243, 1) 0%, rgba(246, 245, 243, 1) 60%, rgba(246, 245, 243, 0) 100%);
+    pointer-events: none;
+    z-index: 20;
+  }
+
   .bottom-fade {
     position: fixed;
     left: 0;
@@ -586,6 +597,8 @@
 </style>
 </head>
 <body>
+
+<div class="top-fade"></div>
 
 <div class="login-screen" id="login-screen">
   <div class="login-box">
@@ -911,7 +924,7 @@
   let categories = loadCategories();
   let editingId = null;
   let selectedIcon = ICONS[0];
-  let selectedMode = 'desde';
+  let selectedMode = 'faltam';
   let selectedUnit = 'dias';
   let selectedCategory = categories[0];
   let selectedRepeat = 'none';
@@ -1294,7 +1307,7 @@
   function openNew() {
     editingId = null;
     selectedIcon = ICONS[0];
-    selectedMode = 'desde';
+    selectedMode = 'faltam';
     selectedUnit = 'dias';
     selectedCategory = categories[0];
     selectedRepeat = 'none';
