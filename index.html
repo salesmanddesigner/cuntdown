@@ -388,12 +388,15 @@
     position: fixed;
     inset: 0;
     background: rgba(30, 30, 30, 0.35);
-    display: none;
+    display: flex;
     align-items: flex-end;
     justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
     z-index: 10;
   }
-  .overlay.is-open { display: flex; }
+  .overlay.is-open { opacity: 1; pointer-events: auto; }
 
   .sheet {
     width: 100%;
@@ -403,7 +406,10 @@
     padding: 22px 22px calc(24px + env(safe-area-inset-bottom));
     max-height: 88vh;
     overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
   }
+  .overlay.is-open .sheet { transform: translateY(0); }
 
   .sheet-handle {
     width: 36px;
@@ -567,6 +573,27 @@
   }
   .category-picker button.add-category {
     border-style: dashed;
+    color: var(--ink);
+  }
+  .category-pill {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+  }
+  .category-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--detail);
+    color: var(--ink);
+    font-size: 12px;
+    line-height: 1;
+  }
+  .category-pill.is-active .category-delete {
+    background: var(--bg);
     color: var(--ink);
   }
 
@@ -1060,8 +1087,30 @@
     categories.forEach(cat => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.textContent = cat;
-      btn.className = cat === selectedCategory ? 'is-active' : '';
+      btn.className = 'category-pill' + (cat === selectedCategory ? ' is-active' : '');
+
+      const label = document.createElement('span');
+      label.textContent = cat;
+      btn.appendChild(label);
+
+      const del = document.createElement('span');
+      del.className = 'category-delete';
+      del.textContent = '×';
+      del.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (categories.length <= 1) {
+          alert('Precisa ter pelo menos uma categoria.');
+          return;
+        }
+        if (!confirm(`Excluir a categoria "${cat}"?`)) return;
+        categories = categories.filter(c => c !== cat);
+        saveCategories();
+        if (selectedCategory === cat) selectedCategory = categories[0];
+        renderCategoryPicker();
+        renderFilterCategoryOptions();
+      });
+      btn.appendChild(del);
+
       btn.addEventListener('click', () => {
         selectedCategory = cat;
         renderCategoryPicker();
