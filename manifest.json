@@ -1,6 +1,6 @@
 {
-  "name": "Meus eventos",
-  "short_name": "Eventos",
+  "name": "Cuntdown",
+  "short_name": "Cuntdown",
   "description": "Contador de dias para datas especiais.",
   "id": "./",
   "start_url": "./index.html",
