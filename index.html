@@ -462,6 +462,21 @@
     color: var(--ink);
     text-transform: capitalize;
   }
+  .calendar-month-select {
+    display: flex;
+    gap: 6px;
+  }
+  .calendar-month-select select {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1.5px solid var(--detail);
+    border-radius: 9px;
+    padding: 5px 6px;
+    font-family: inherit;
+    text-transform: capitalize;
+  }
   .calendar-nav { display: flex; gap: 6px; }
   .calendar-nav button {
     width: 28px;
@@ -708,7 +723,10 @@
       <label>Data</label>
       <div class="calendar">
         <div class="calendar-header">
-          <span class="calendar-month" id="cal-month-label"></span>
+          <div class="calendar-month-select">
+            <select id="cal-month-select"></select>
+            <select id="cal-year-select"></select>
+          </div>
           <div class="calendar-nav">
             <button type="button" id="cal-prev">‹</button>
             <button type="button" id="cal-next">›</button>
@@ -1086,6 +1104,8 @@
 
   let calViewYear = todayAtMidnight().getFullYear();
   let calViewMonth = todayAtMidnight().getMonth();
+  const CAL_YEAR_MIN = todayAtMidnight().getFullYear() - 100;
+  const CAL_YEAR_MAX = todayAtMidnight().getFullYear() + 15;
 
   function toISODate(date) {
     const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -1098,13 +1118,29 @@
     calViewMonth = date.getMonth();
   }
 
+  function populateCalendarSelects() {
+    const monthSelect = document.getElementById('cal-month-select');
+    const yearSelect = document.getElementById('cal-year-select');
+    if (monthSelect.children.length === 0) {
+      monthSelect.innerHTML = MESES.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+    }
+    if (yearSelect.children.length === 0) {
+      let opts = '';
+      for (let y = CAL_YEAR_MAX; y >= CAL_YEAR_MIN; y--) {
+        opts += `<option value="${y}">${y}</option>`;
+      }
+      yearSelect.innerHTML = opts;
+    }
+  }
+
   function renderCalendar() {
-    const monthLabel = document.getElementById('cal-month-label');
     const grid = document.getElementById('cal-grid');
     const selectedIso = document.getElementById('f-date').value;
     const todayIso = toISODate(todayAtMidnight());
 
-    monthLabel.textContent = `${MESES[calViewMonth]} de ${calViewYear}`;
+    populateCalendarSelects();
+    document.getElementById('cal-month-select').value = String(calViewMonth);
+    document.getElementById('cal-year-select').value = String(calViewYear);
 
     const firstOfMonth = new Date(calViewYear, calViewMonth, 1);
     const offset = (firstOfMonth.getDay() + 6) % 7;
@@ -1132,6 +1168,15 @@
       grid.appendChild(btn);
     }
   }
+
+  document.getElementById('cal-month-select').addEventListener('change', (e) => {
+    calViewMonth = Number(e.target.value);
+    renderCalendar();
+  });
+  document.getElementById('cal-year-select').addEventListener('change', (e) => {
+    calViewYear = Number(e.target.value);
+    renderCalendar();
+  });
 
   document.getElementById('cal-prev').addEventListener('click', () => {
     calViewMonth -= 1;
